@@ -1,8 +1,8 @@
-ssid: "CC"
-password: "chen1122"
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "CT1 Fallback"
+    password: !secret wifi_password
 
-# 开启 Fallback AP (WiFi 失败时自动开启)
-ap:
-  ssid: "CT1 Fallback"
-  password: "12345678"
 captive_portal:
