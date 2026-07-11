@@ -1,6 +1,6 @@
 substitutions:
-  dev_name: "ct1"
-  friendly_name: "CT1 BLE Gateway"
+  dev_name: "ct2"
+  friendly_name: "CT2 BLE Gateway"
 
 esphome:
   name: ${dev_name}
