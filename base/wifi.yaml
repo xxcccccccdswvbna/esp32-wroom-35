@@ -1,0 +1,7 @@
+ssid: "CC"
+password: "chen1122"
+
+# 开启 Fallback AP (WiFi 失败时自动开启)
+ap:
+  ssid: "CT1 Fallback"
+  password: "12345678"
