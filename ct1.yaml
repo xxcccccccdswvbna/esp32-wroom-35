@@ -1,15 +1,56 @@
-ct1/
-├── ct1.yaml              # 主入口文件
-├── base/                 # 基础系统模块
-│   ├── wifi.yaml
-│   ├── web.yaml
-│   ├── sensor.yaml
-│   ├── text_sensor.yaml
-│   ├── output.yaml
-│   ├── led.yaml
-│   └── button.yaml
-├── ble/                  # BLE 核心模块 (本阶段先搭空壳)
-│   ├── globals.yaml
-│   └── script.yaml
-└── keys/                 # 物理按键模块
-    └── physical.yaml
+substitutions:
+  dev_name: "ct1"
+  friendly_name: "CT1 BLE Gateway"
+
+esphome:
+  name: ${dev_name}
+  friendly_name: ${friendly_name}
+
+esp32:
+  board: esp32dev
+  flash_size: 4MB
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      CONFIG_FREERTOS_UNICORE: y
+
+logger:
+api:
+ota:
+  - platform: esphome
+
+# --- 引入基础系统 ---
+wifi: !include base/wifi.yaml
+captive_portal:
+web_server: !include base/web.yaml
+
+# --- BLE 核心 (本阶段保留基础配置，后续阶段再拆分) ---
+esp32_ble:
+  io_capability: none
+  enable_on_boot: true
+
+esp32_ble_server:
+  id: ble_server
+  manufacturer_data: []
+
+esp32_ble_tracker:
+  scan_parameters:
+    interval: 1000ms
+    window: 50ms
+    active: false
+
+bluetooth_proxy:
+  active: true
+  cache_services: true
+
+# --- 引入全局变量与脚本 ---
+globals: !include ble/globals.yaml
+script: !include ble/script.yaml
+
+# --- 引入实体定义 ---
+sensor: !include base/sensor.yaml
+text_sensor: !include base/text_sensor.yaml
+output: !include base/output.yaml
+light: !include base/led.yaml
+binary_sensor: !include keys/physical.yaml
+button: !include base/button.yaml
