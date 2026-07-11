@@ -1,0 +1,116 @@
+name: Build & Release ESPHome Gateway
+
+on:
+  workflow_dispatch: # 允许在网页端手动点击运行
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - "**/*.yaml"
+      - "**/*.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  # ── 任务1：自动寻找根目录下的主配置文件 ──────────────
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      files: ${{ steps.find_files.outputs.files }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: 查找根目录的主配置文件
+        id: find_files
+        run: |
+          # 查找根目录下的所有 yaml 文件，排除 secrets.yaml
+          FILES=$(find . -maxdepth 1 -name "*.yaml" ! -name "secrets.yaml" | sed 's|^\./||' | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          
+          if [ "$FILES" = "[]" ] || [ -z "$FILES" ]; then
+            echo "❌ 未找到根目录下的主配置文件 (如 ct1.yaml)！"
+            exit 1
+          fi
+          
+          echo "files=$FILES" >> $GITHUB_OUTPUT
+          echo "🎯 将要编译的文件: $FILES"
+
+  # ── 任务2：编译固件并发布到 Releases ──────────────
+  build:
+    needs: detect
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false # 如果某个设备编译失败，不中断其他设备
+      matrix:
+        yaml-file: ${{ fromJson(needs.detect.outputs.files) }}
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      # 🔐 动态生成 secrets.yaml (注入密码)
+      - name: 生成 secrets.yaml
+        run: |
+          cat > secrets.yaml << EOF
+          wifi_ssid: "${{ secrets.WIFI_SSID }}"
+          wifi_password: "${{ secrets.WIFI_PASSWORD }}"
+          api_encryption_key: "${{ secrets.API_KEY }}"
+          ota_password: "${{ secrets.OTA_PASSWORD }}"
+          EOF
+          echo "✅ secrets.yaml 已生成"
+
+      # 🛠️ 调用 ESPHome 官方 action 进行编译
+      - name: 编译 ESPHome (${{ matrix.yaml-file }})
+        uses: esphome/build-action@v6
+        with:
+          yaml-file: ${{ matrix.yaml-file }}
+          version: latest
+
+      # 📦 收集并整理编译产物
+      - name: 收集并重命名固件
+        run: |
+          mkdir -p output
+          # 提取设备名 (去掉 .yaml 后缀，例如 ct1)
+          DEVICE_NAME=$(echo "${{ matrix.yaml-file }}" | sed 's/\.yaml$//')
+          
+          # 将编译出的 bin 和 manifest 复制到 output 目录，并加上设备名前缀
+          find .esphome/build -name "*.bin" -exec cp {} "output/${DEVICE_NAME}.bin" \;
+          find .esphome/build -name "manifest.json" -exec cp {} "output/${DEVICE_NAME}-manifest.json" \;
+          
+          echo "📦 最终输出文件:"
+          ls -lh output/
+
+      # 🏷️ 生成版本号
+      - name: 生成版本号
+        id: version
+        run: |
+          TIMESTAMP=$(date +'%Y%m%d-%H%M')
+          SHORT_SHA=${GITHUB_SHA:0:7}
+          DEVICE_NAME=$(echo "${{ matrix.yaml-file }}" | sed 's/\.yaml$//')
+          TAG="v${DEVICE_NAME}-${TIMESTAMP}-${SHORT_SHA}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "device=$DEVICE_NAME" >> $GITHUB_OUTPUT
+
+      # 📤 发布到 GitHub Releases
+      - name: 发布到 GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: "🔧 ${{ steps.version.outputs.device }} Build ${{ steps.version.outputs.tag }}"
+          body: |
+            ## 📋 编译信息
+            **设备名称**: `${{ steps.version.outputs.device }}`
+            **配置文件**: `${{ matrix.yaml-file }}`
+            **提交哈希**: `${{ github.sha }}`
+            
+            ## 📥 Web 刷写方法
+            1. 访问 https://web.esphome.io
+            2. 选择对应的 `.bin` 文件刷入设备。
+          files: |
+            output/*.bin
+            output/*-manifest.json
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
