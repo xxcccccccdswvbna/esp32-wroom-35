@@ -2,30 +2,30 @@ substitutions:
   dev_name: "ct2"
   friendly_name: "CT2 BLE Gateway"
 
+# 1. esphome 配置（只包含 name 和 friendly_name）
 esphome:
   name: ${dev_name}
   friendly_name: ${friendly_name}
-  
-  # ================= 核心：使用 packages 引入所有子模块 =================
-  packages:
-    # 基础系统模块
-    base_wifi: !include base/wifi.yaml
-    base_web: !include base/web.yaml
-    base_sensors: !include base/sensors.yaml
-    base_text_sensors: !include base/text_sensors.yaml
-    base_outputs: !include base/outputs.yaml
-    base_lights: !include base/lights.yaml
-    base_buttons: !include base/buttons.yaml
-    base_keys: !include base/physical_keys.yaml
-    
-    # BLE 核心模块
-    ble_core: !include ble/core.yaml
-    ble_globals: !include ble/globals.yaml
-    ble_script: !include ble/script.yaml
-    ble_tracker: !include ble/tracker.yaml
-    ble_dev3: !include ble/dev3.yaml
-    ble_dev_controls: !include ble/dev_controls.yaml
 
+# 2. ✅ packages 必须在这里！和 esphome 平级（不要缩进）
+packages:
+  base_wifi: !include base/wifi.yaml
+  base_web: !include base/web.yaml
+  base_sensors: !include base/sensors.yaml
+  base_text_sensors: !include base/text_sensors.yaml
+  base_outputs: !include base/outputs.yaml
+  base_lights: !include base/lights.yaml
+  base_buttons: !include base/buttons.yaml
+  base_keys: !include base/physical_keys.yaml
+  
+  ble_core: !include ble/core.yaml
+  ble_globals: !include ble/globals.yaml
+  ble_script: !include ble/script.yaml
+  ble_tracker: !include ble/tracker.yaml
+  ble_dev3: !include ble/dev3.yaml
+  ble_dev_controls: !include ble/dev_controls.yaml
+
+# 3. 其他顶级配置
 esp32:
   board: esp32dev
   flash_size: 4MB
