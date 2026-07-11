@@ -1,0 +1,9 @@
+light:
+  - platform: binary
+    name: "Blue LED"
+    id: blue_led
+    output: blue_led_out
+  - platform: binary
+    name: "White LED"
+    id: white_led
+    output: white_led_out
