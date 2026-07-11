@@ -1,0 +1,4 @@
+# Web 控制台 + Web OTA（浏览器访问 http://192.168.6.82）
+web_server:
+  port: 80
+  version: 2
