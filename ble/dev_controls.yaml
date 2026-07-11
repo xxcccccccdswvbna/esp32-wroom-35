@@ -1,0 +1,72 @@
+select:
+  # 🟦 Dev1 亮度
+  - platform: template
+    name: "Dev1 Light Brightness"
+    id: dev1_brt
+    options: ["0%", "20%", "40%", "50%", "60%", "80%", "100%"]
+    optimistic: true
+    set_action:
+      - lambda: |-
+          if (millis() - id(last_cmd_time) < 200) return; id(last_cmd_time) = millis();
+          # ... [这里请把你原来代码里 Dev1 亮度的 if/else 逻辑完整粘贴过来] ...
+      - script.execute: ble_send
+
+  # 🟦 Dev1 色温
+  - platform: template
+    name: "Dev1 Light Color Temp"
+    id: dev1_ct
+    options: ["2700K", "3650K", "4600K", "5550K", "6500K"]
+    optimistic: true
+    set_action:
+      - lambda: |-
+          if (millis() - id(last_cmd_time) < 200) return; id(last_cmd_time) = millis();
+          # ... [这里请把你原来代码里 Dev1 色温的 if/else 逻辑完整粘贴过来] ...
+      - script.execute: ble_send
+
+  # 🟦 Dev1 风扇
+  - platform: template
+    name: "Dev1 Fan Speed Select"
+    id: dev1_fan_select
+    options: ["关", "开", "1 档", "2 档", "3 档", "4 档", "5 档", "6 档"]
+    optimistic: true
+    set_action:
+      - lambda: |-
+          if (millis() - id(last_cmd_time) < 200) return; id(last_cmd_time) = millis();
+          # ... [这里请把你原来代码里 Dev1 风扇的 if/else 逻辑完整粘贴过来] ...
+      - script.execute: ble_send
+
+  # 🟧 Dev2 亮度
+  - platform: template
+    name: "Dev2 Light Brightness"
+    id: dev2_brt
+    options: ["0%", "20%", "40%", "50%", "60%", "80%", "100%"]
+    optimistic: true
+    set_action:
+      - lambda: |-
+          if (millis() - id(last_cmd_time) < 200) return; id(last_cmd_time) = millis();
+          # ... [这里请把你原来代码里 Dev2 亮度的 if/else 逻辑完整粘贴过来] ...
+      - script.execute: ble_send
+
+  # 🟧 Dev2 色温
+  - platform: template
+    name: "Dev2 Light Color Temp"
+    id: dev2_ct
+    options: ["2700K", "3500K", "6500K"]
+    optimistic: true
+    set_action:
+      - lambda: |-
+          if (millis() - id(last_cmd_time) < 200) return; id(last_cmd_time) = millis();
+          # ... [这里请把你原来代码里 Dev2 色温的 if/else 逻辑完整粘贴过来] ...
+      - script.execute: ble_send
+
+  # 🟧 Dev2 风扇
+  - platform: template
+    name: "Dev2 Fan Speed Select"
+    id: dev2_fan_select
+    options: ["关", "开", "1 档", "2 档", "3 档", "4 档", "5 档", "6 档"]
+    optimistic: true
+    set_action:
+      - lambda: |-
+          if (millis() - id(last_cmd_time) < 200) return; id(last_cmd_time) = millis();
+          # ... [这里请把你原来代码里 Dev2 风扇的 if/else 逻辑完整粘贴过来] ...
+      - script.execute: ble_send
