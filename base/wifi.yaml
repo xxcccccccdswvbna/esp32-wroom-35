@@ -5,3 +5,4 @@ password: "chen1122"
 ap:
   ssid: "CT1 Fallback"
   password: "12345678"
+captive_portal:
