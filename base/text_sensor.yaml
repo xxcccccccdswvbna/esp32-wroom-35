@@ -1,7 +1,8 @@
-- platform: wifi_info
-  ip_address:
-    name: "ESP IP Address"
-  ssid:
-    name: "ESP Connected SSID"
-  bssid:
-    name: "ESP Connected BSSID"
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "ESP IP Address"
+    ssid:
+      name: "ESP Connected SSID"
+    bssid:
+      name: "ESP Connected BSSID"
