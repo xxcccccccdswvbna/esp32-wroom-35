@@ -66,18 +66,20 @@ jobs:
           yaml-file: ${{ matrix.yaml-file }}
           version: latest
 
-      # 📦 收集并整理编译产物
-      - name: 收集并重命名固件
+      # 📦 收集编译产物 (✅ 修复：保留所有原始 .bin 文件名，防止覆盖)
+      - name: 收集固件文件 (保留原名)
         run: |
           mkdir -p output
-          # 提取设备名 (去掉 .yaml 后缀，例如 ct1)
+          echo "🔍 查找编译产物..."
+          
+          # ✅ 核心修改：查找所有 .bin 文件并直接复制，绝对不重命名，保留 ESPHome 生成的原始文件名
+          find .esphome/build -name "*.bin" -type f -exec cp {} output/ \;
+          
+          # 对于 manifest.json，为了防止多设备冲突，加上设备名前缀
           DEVICE_NAME=$(echo "${{ matrix.yaml-file }}" | sed 's/\.yaml$//')
+          find .esphome/build -name "manifest.json" -type f -exec cp {} "output/${DEVICE_NAME}-manifest.json" \;
           
-          # 将编译出的 bin 和 manifest 复制到 output 目录，并加上设备名前缀
-          find .esphome/build -name "*.bin" -exec cp {} "output/${DEVICE_NAME}.bin" \;
-          find .esphome/build -name "manifest.json" -exec cp {} "output/${DEVICE_NAME}-manifest.json" \;
-          
-          echo "📦 最终输出文件:"
+          echo "📦 最终输出文件 (已保留所有 bin 原名):"
           ls -lh output/
 
       # 🏷️ 生成版本号
@@ -105,7 +107,8 @@ jobs:
             
             ## 📥 Web 刷写方法
             1. 访问 https://web.esphome.io
-            2. 选择对应的 `.bin` 文件刷入设备。
+            2. 选择对应的 `manifest.json` 文件（或主 `.bin` 文件）进行刷写。
+            3. 注意：ESP-IDF 框架会生成多个 bin 文件，请使用 manifest 自动匹配，或手动选择对应的 bin。
           files: |
             output/*.bin
             output/*-manifest.json
