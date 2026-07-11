@@ -1,0 +1,27 @@
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO34
+    name: "KEY1"
+    on_press:
+      - light.toggle: blue_led
+  - platform: gpio
+    pin:
+      number: GPIO35
+    name: "KEY2"
+    on_press:
+      - light.toggle: white_led
+  - platform: gpio
+    pin:
+      number: GPIO32
+    name: "KEY3"
+    on_press:
+      - light.turn_on: blue_led
+      - light.turn_on: white_led
+  - platform: gpio
+    pin:
+      number: GPIO33
+    name: "KEY4"
+    on_press:
+      - light.turn_off: blue_led
+      - light.turn_off: white_led
